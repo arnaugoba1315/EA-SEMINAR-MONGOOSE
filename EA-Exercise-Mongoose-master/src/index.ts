@@ -1,50 +1,28 @@
-import { startConnection } from './database.js';
-import { IUser } from './models/User.js';
-import { createUser, findAllUsers } from './services/User.js';
-import { ITodo } from './models/Todo.js';
-import { createTodo, findTodoByCode, findTodoByCodeWithUser  } from './services/Todo.js';
+import express from 'express';
+import bodyParser from 'body-parser';
+import connectDB from './config/database';
 
-async function main() {
-    startConnection();    
+// Importación de rutas
+import autorRoutes from './routes/autor';
+import libroRoutes from './routes/libro';
+import estadisticasRoutes from './routes/estadisticas';
 
-    // One user
-    const user1: IUser = {
-        "name": "Leanne Graham",
-        "username": "Bret",
-        "email": "Sincere@april.biz",
-        "phone": "1-770-736-8031 x56442",
-        "company": {
-        "name": "Romaguera-Crona",
-        }
-    } 
-    
-    // Insert user
-    const newUser = await createUser(user1);
-    console.log('User Inserted ' + newUser);
+// Inicialización de la app
+const app = express();
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
-    // One todo
-    const todo1: Partial<ITodo> = {
-        "code": 1,
-        "name": "delectus aut autem",
-        "completed": false
-    }
+// Middleware
+app.use(bodyParser.json());
 
-    // Insert todo
-    const newTodo = await createTodo(todo1, user1);
-    console.log('Todo Inserted ' + newTodo);
+// Conexión a la base de datos
+connectDB();
 
-    // Find Todo
-    const todo2 = await findTodoByCode(1);
-    console.log('Todo  ' + todo2);
+// Rutas
+app.use('/autores', autorRoutes);
+app.use('/libros', libroRoutes);
+app.use('/estadisticas', estadisticasRoutes);
 
-    // Find Todo with User
-    const todo3 = await findTodoByCodeWithUser(1);
-    console.log('Todo with User ' + todo3);
-
-    // Find All Users
-    const users = await findAllUsers();
-    console.log('All Users ' + users);
-}
-
-
-main();
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`Servidor iniciado en el puerto ${PORT}`);
+});
